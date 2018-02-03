@@ -1,89 +1,86 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 
-namespace JSON_PARSER
-{
-    class Program
-    {
-        //static String json= "{\"glossary\":{\"title\":\"exampleglossary\",\"GlossDiv\":{\"title\":\"S\",\"GlossList\":{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}}}}";
-        static String json = "{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
-        static String json2 = "{\"GlossEntry\":{\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
-        static String json_shhadi = "{\"name\":\"shhadi\",\"sex\":\"m,a,l,e\",\"job\":{\"name\":\"software,developer\",\"org\":\"check,point\"},\"age\":29}";
+        #my $json= "{\"glossary\":{\"title\":\"exampleglossary\",\"GlossDiv\":{\"title\":\"S\",\"GlossList\":{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}}}}";
+        my $json = "{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
+        my $json2 = "{\"GlossEntry\":{\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
+        my $json_shhadi = "{\"name\":\"shhadi\",\"sex\":\"m,a,l,e\",\"job\":{\"name\":\"software,developer\",\"org\":\"check,point\"},\"age\":29}";
 
-        static void Main(string[] args)
+        #static void Main(string[] args)
+		sub Main
         {
 
-            var result = Parse(json2);
+            my $result = Parse($json2);
 
         }
 
-        static Dictionary<String, Object> Parse(String input)
+        #static Dictionary<String, Object> Parse(String input)
+		sub Parse()
         {
-            var dictionary = new Dictionary<String, Object>();
-            var parts = getObjectParts(input);
+			my ($input) = @_;
+			my %dictionary;
+            my @parts = getObjectParts(input);
 
-            foreach (var part in parts)
+			foreach $part (@parts)
             {
-                var pair = getPairOfObject(part);
-                var key = pair[0];
-                var value = pair[1];
+                my @pair = getPairOfObject($part);
+                my $key = $pair[0];
+                my $value = $pair[1];
 
-                if (!isNull(key))
+                if (!isNull($key))
                 {
-                    if (isNull(value))
+                    if (isNull($value))
                     {
-                        dictionary.Add(key, "");
+						dictionary{$key} = "";
                     }
 
                     else if (isString(value) || isNumber(value) || isBoolean(value))
                     {
-                        dictionary.Add(key, value);
+						dictionary{$key} = $value;
                     }
 
                     else if (isArray(value))
                     {
-                        var elements = getElementsOfArray(value);
-                        var parsedElements = new List<Object>();
+                        my @elements = getElementsOfArray(value);
+                        my @parsedElements;
 
-                        foreach (var element in elements)
+                        foreach $element (@elements)
                         {
-                            if (isNull(element) || isString(element) || isNumber(element) || isBoolean(element))
-                            {
-                                parsedElements.Add(element);
+                            if (isNull($element) || isString($element) || isNumber($element) || isBoolean($element))
+                            {	
+                                push(@parsedElements,$element);
                             }
-                            else if (isArray(element))
+                            else if (isArray($element))
                             {
-                                parsedElements.Add(getElementsOfArray(element));
+                                push(@parsedElements,getElementsOfArray($element));
                             }
-                            else if (isObject(element))
+                            else if (isObject($element))
                             {
-                                parsedElements.Add(getPairOfObject(element));
+                                push(@parsedElements,getPairOfObject($element));
                             }
                         }
-
-                        dictionary.Add(key, parsedElements);
+							
+						
+                        dictionary{$key} = $parsedElements;
+                        
                     }
 
-                    else if (isObject(value))
+                    else if (isObject($value))
                     {
-                        dictionary.Add(key, Parse(value));
+                        dictionary{$key} = Parse($value));
                     }
                     else
                     {
-                        var _pair = split(value, ",\"");
-                        var _value = _pair[0];
-                        var _element = _pair[1];
-                        dictionary.Add(key, _value);
-                        Parse(_element);
+                        @_pair = split($value, ",\"");
+                        my $_value = $_pair[0];
+                        my $_element = $_pair[1];
+                        dictionary{key} = $_value;
+                        Parse($_element);
                     }
 
                 }
             }
 
-            return dictionary;
+            return %dictionary;
         }
         
         static List<String> getObjectParts(String input)
