@@ -7,15 +7,16 @@ using System.Text;
 namespace JSON_PARSER
 {
     class Program
-    {        
+    {
         //static String json= "{\"glossary\":{\"title\":\"exampleglossary\",\"GlossDiv\":{\"title\":\"S\",\"GlossList\":{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}}}}";
-        static String json= "{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
+        static String json = "{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
+        static String json2 = "{\"GlossEntry\":{\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
         static String json_shhadi = "{\"name\":\"shhadi\",\"sex\":\"m,a,l,e\",\"job\":{\"name\":\"software,developer\",\"org\":\"check,point\"},\"age\":29}";
 
         static void Main(string[] args)
         {
 
-            var result = Parse(json);
+            var result = Parse(json2);
 
         }
 
@@ -90,6 +91,7 @@ namespace JSON_PARSER
             var indexes = new List<int>();
             var openedTag = 1;
             var openedString = 0;
+            var openedArray = 0;
 
             input = removeTags(input);
 
@@ -104,6 +106,12 @@ namespace JSON_PARSER
                         break;
                     case '}':
                         openedTag--;
+                        break;
+                    case '[':
+                        openedArray++;
+                        break;
+                    case ']':
+                        openedArray--;
                         break;
                     case '"':
                         if (openedString == 0)
@@ -120,7 +128,7 @@ namespace JSON_PARSER
                     //case ':':
                       //  continue;
                     case ',':
-                        if (openedString == 0 && openedTag == 1)
+                        if (openedString == 0 && openedArray==0 && openedTag == 1)
                         {
                             indexes.Add(i);
                         }

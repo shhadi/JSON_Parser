@@ -5,3 +5,6 @@ C:\Users\Shhadi\Documents\Visual Studio 2015\Projects\JSON_PARSER\JSON_PARSER\ob
 C:\Users\Shhadi\Documents\Visual Studio 2015\Projects\JSON_PARSER\JSON_PARSER\obj\Debug\JSON_PARSER.pdb
 C:\Users\Shhadi\Desktop\Public_Projects\JSON_Parser\obj\Debug\JSON_PARSER.exe
 C:\Users\Shhadi\Desktop\Public_Projects\JSON_Parser\obj\Debug\JSON_PARSER.pdb
+C:\Users\Shhadi\Desktop\Public_Projects\JSON_Parser\bin\Debug\JSON_PARSER.exe
+C:\Users\Shhadi\Desktop\Public_Projects\JSON_Parser\bin\Debug\JSON_PARSER.pdb
+C:\Users\Shhadi\Desktop\Public_Projects\JSON_Parser\obj\Debug\JSON_PARSER.csprojResolveAssemblyReference.cache
