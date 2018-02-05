@@ -1,5 +1,7 @@
 
 
+		
+
         #my $json= "{\"glossary\":{\"title\":\"exampleglossary\",\"GlossDiv\":{\"title\":\"S\",\"GlossList\":{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}}}}";
         my $json = "{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
         my $json2 = "{\"GlossEntry\":{\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
@@ -83,63 +85,64 @@
             return %dictionary;
         }
         
-        static List<String> getObjectParts(String input)
-        {
-            var indexes = new List<int>();
-            var openedTag = 1;    #'{'
-            var openedString = 0; #'"'
-            var openedArray = 0;  #'['
+        #static List<String> getObjectParts(String input)
+        sub getObjectParts
+		{
+			my $input = $_[0];
+            my @indexes;   # = new List<int>();
+            my $openedTag = 1;    #'{'
+            my $openedString = 0; #'"'
+            my $openedArray = 0;  #'['
 
-            input = removeTags(input);
+            $input = removeTags($input);
 
-            for (int i=0;i<input.Length;i++)
+            for (my $i=0;$i<length $input;$i++)
             {
-                var ch = input[i];
+                my $ch = $input[$i];
 
-                switch (ch)
+                if($ch=='{')
+				{
+					$openedTag = $openedTag + 1;
+				}
+				if($ch=='}')
                 {
-                    case '{':
-                        openedTag++;
-                        break;
-                    case '}':
-                        openedTag--;
-                        break;
-                    case '[':
-                        openedArray++;
-                        break;
-                    case ']':
-                        openedArray--;
-                        break;
-                    case '"':
-                        if (openedString == 0)
-                        {
-                            openedString++;   //String started.
-                            //stringStartIndex = i;
-                        }
-                        else
-                        {
-                            openedString = 0;  //String closed.
-                            //stringEndIndex = i;
-                        }
-                        break;
-                    //case ':':
-                      //  continue;
-                    case ',':
-                        if (openedString == 0 && openedArray==0 && openedTag == 1)
-                        {
-                            indexes.Add(i);
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                        break;
+                    $openedTag = $openedTag - 1;
                 }
-            }
+				if($ch=='[')
+                {
+                    $openedArray = $openedArray+1;
+                }
+				if($ch==']')
+				{
+                    $openedArray = $openedArray-1;
+                }
+				if($ch=='"')
+                {
+                    if ($openedString == 0)
+                    {
+                        $openedString = $openedString + 1;   #String started.
+                    }
+                    else
+                    {
+                        $openedString = 0;    #String closed.
+                    }
+                }
+				if($ch==',')
+				{
+                    if ($openedString == 0 && $openedArray==0 && $openedTag == 1)
+                    {
+						push $indexes,$i;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+        
 
-            var parts = split(input, indexes);
+            my @parts =   split1($input, $indexes);
 
-            return parts;
+            return @parts;
         }
 
         #static String removeTags(String input)
