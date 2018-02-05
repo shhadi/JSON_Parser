@@ -1,23 +1,30 @@
+use Data::Dumper;
 
-Main;
+Main();
 
-#my $json= "{\"glossary\":{\"title\":\"exampleglossary\",\"GlossDiv\":{\"title\":\"S\",\"GlossList\":{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}}}}";
-my $json = "{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
-my $json2 = "{\"GlossEntry\":{\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
-my $json_shhadi = "{\"name\":\"shhadi\",\"sex\":\"m,a,l,e\",\"job\":{\"name\":\"software,developer\",\"org\":\"check,point\"},\"age\":29}";
 
 #static void Main(string[] args)
 sub Main
-{	
-    my $result = Parse($json2);
+{
+	#my $json= "{\"glossary\":{\"title\":\"exampleglossary\",\"GlossDiv\":{\"title\":\"S\",\"GlossList\":{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}}}}";
+	$json = "{\"GlossEntry\":{\"ID\":\"SGML\",\"SortAs\":\"SGML\",\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
+	$json2 = "{\"GlossEntry\":{\"GlossTerm\":\"StandardGeneralizedMarkupLanguage\",\"Acronym\":\"SGML\",\"Abbrev\":\"ISO8879:1986\",\"GlossDef\":{\"para\":\"Ameta-markuplanguage,usedtocreatemarkuplanguagessuchasDocBook.\",\"GlossSeeAlso\":[\"GML\",\"XML\"]},\"GlossSee\":\"markup\"}}";
+	$json_shhadi = "{\"name\":\"shhadi\",\"sex\":\"m,a,l,e\",\"job\":{\"name\":\"software,developer\",\"org\":\"check,point\"},\"age\":29}";
+
+    my %result = Parse($json_shhadi);
+	#print Dumper(\%result);
+
 }
 
 #static Dictionary<String, Object> Parse(String input)
 sub Parse
 {
-	my ($input) = @_;
+	my $input = $_[0];
 	my %dictionary;
-    my @parts = getObjectParts(input);
+    my @parts = getObjectParts($input);
+	
+	
+	#print Dumper(\@parts);
 
 	foreach $part (@parts)
     {
@@ -31,13 +38,13 @@ sub Parse
             {
 				dictionary{$key} = "";
             }
-            elsif (isString(value) || isNumber(value) || isBoolean(value))
+            elsif (isString($value) || isNumber($value) || isBoolean($value))
             {
 				dictionary{$key} = $value;
             }
-            elsif (isArray(value))
+            elsif (isArray($value))
             {
-                my @elements = getElementsOfArray(value);
+                my @elements = getElementsOfArray($value);
                 my @parsedElements;
 
                 foreach $element (@elements)
@@ -88,30 +95,31 @@ sub getObjectParts
     my $openedTag = 1;    #'{'
     my $openedString = 0; #'"'
     my $openedArray = 0;  #'['
-
+	
     $input = removeTags($input);
-
-    for (my $i=0;$i<length $input;$i++)
+	my @inputArray = split //, $input;
+	
+    for (my $i=0;$i< @inputArray;$i++)
     {
-        my $ch = $input[$i];
-
-        if($ch=='{')
+        $ch = $inputArray[$i];
+		
+        if(index($ch,"{")==0)
 		{
 			$openedTag = $openedTag + 1;
 		}
-		if($ch=='}')
+		elsif(index($ch,"}")==0)
         {
             $openedTag = $openedTag - 1;
         }
-		if($ch=='[')
+		elsif(index($ch,"[")==0)
         {
             $openedArray = $openedArray+1;
         }
-		if($ch==']')
+		elsif(index($ch,"]")==0)
 		{
             $openedArray = $openedArray-1;
         }
-		if($ch=='"')
+		elsif(index($ch,"\"")==0)
         {
             if ($openedString == 0)
             {
@@ -122,7 +130,7 @@ sub getObjectParts
                 $openedString = 0;    #String closed.
             }
         }
-		if($ch==',')
+		elsif(index($ch,",")==0)
 		{
             if ($openedString == 0 && $openedArray==0 && $openedTag == 1)
             {
@@ -130,13 +138,14 @@ sub getObjectParts
             }
             else
             {
-                continue;
+                next;
             }
         }
 	}
-
-    my @parts =   split1($input, $indexes);
-
+	
+	
+    my @parts =   split1($input, @indexes);
+	
     return @parts;
 }
 
@@ -144,7 +153,7 @@ sub getObjectParts
 sub removeTags
 {
 	my $input = $_[0];
-    my $result = substr $input,1,length $input -1;    # input.Substring(1);
+    my $result = substr $input,1,(length $input)-2;    # input.Substring(1);
                                                        #result = result.Substring(0, result.Length - 1);
     return $result;
 }
@@ -152,33 +161,34 @@ sub removeTags
 #static List<String> split1(String input,List<int> indexes)
 sub split1
 {
-	my $input = $_[0];
-	my @indexes = $_[1];
+	($input,@indexes) = @_;
     my @parts;
-    my $count = length $indexes;
-
-    for (my $i = 0; i < $count; $i++)
+	
+    for (my $i = 0; $i < @indexes; $i++)
     {
         #[3,8]
         my $part = "";
 
-        if ($i == 0 )
+		if ($i == 0 )
         {
-            $part = substr $input,0,$indexes[i];       # input.Substring(0, indexes[i]);
-            $input = substr $input,$indexese[i]+1,length $input -1       # input.Substring(indexes[i] + 1);
+            $part = substr $input,0,$indexes[$i];       # input.Substring(0, indexes[i]);
+            $input = substr $input,$indexes[$i]+1,(length $input) -1;       # input.Substring(indexes[i] + 1);
+			
         }
         else
-        {
+        {   
+			#[15,85]
             $part = substr $input,0,$indexes[$i] - $indexes[$i - 1] - 1;      #input.Substring(0, indexes[i] - indexes[i - 1] - 1);
-            $input = substr $input,$indexes[$i] - $indexes[$i - 1],length $input -1;    #input.Substring(indexes[i] - indexes[i - 1] );
+            #$input = substr $input,$indexes[$i] - $indexes[$i - 1],(length $input) -  $indexes[$i];    #input.Substring(indexes[i] - indexes[i - 1] );
+			$input = substr $input,$indexes[$i]+1,(length $input) -1; 
+			
         }
 		
+		print "$part\n-----\n$input\n================\n";
 		push @parts,$part;
-        #parts.Add(part);
     }
 
 	push @parts,$input;
-    #parts.Add(input);
     return @parts;
 }
 
