@@ -86,9 +86,9 @@
         static List<String> getObjectParts(String input)
         {
             var indexes = new List<int>();
-            var openedTag = 1;
-            var openedString = 0;
-            var openedArray = 0;
+            var openedTag = 1;    #'{'
+            var openedString = 0; #'"'
+            var openedArray = 0;  #'['
 
             input = removeTags(input);
 
@@ -142,120 +142,152 @@
             return parts;
         }
 
-        static String removeTags(String input)
+        #static String removeTags(String input)
+		sub removeTags
         {
-            var result = input.Substring(1);
-            result = result.Substring(0, result.Length - 1);
-            return result;
+			my $input = $_[0];
+            my $result = substr $input,1,$length $input -1;    # input.Substring(1);
+                                                               #result = result.Substring(0, result.Length - 1);
+            return $result;
         }
 
-        static List<String> split(String input,List<int> indexes)
-        {
-            var parts = new List<String>();
-            var count = indexes.Count;
+        #static List<String> split1(String input,List<int> indexes)
+		sub split1
+       {
+			my $input = $_[0];
+			my @indexes = $_[1];
+            my @parts;
+            my $count = length $indexes;
 
-            for (int i = 0; i < count; i++)
+            for (my $i = 0; i < $count; $i++)
             {
                 //[3,8]
-                var part = "";
+                my $part = "";
 
-                if (i == 0 )
+                if ($i == 0 )
                 {
-                    part = input.Substring(0, indexes[i]);
-                    input = input.Substring(indexes[i] + 1);
+                    $part = substr $input,0,$indexes[i];       # input.Substring(0, indexes[i]);
+                    $input = substr $input,$indexese[i]+1,length $input -1       # input.Substring(indexes[i] + 1);
                 }
                 else
                 {
-                    part = input.Substring(0, indexes[i] - indexes[i - 1] - 1);
-                    input = input.Substring(indexes[i] - indexes[i - 1] );
+                    $part = substr $input,0,$indexes[$i] - $indexes[$i - 1] - 1;      #input.Substring(0, indexes[i] - indexes[i - 1] - 1);
+                    $input = substr $input,$indexes[$i] - $indexes[$i - 1],length $input -1;    #input.Substring(indexes[i] - indexes[i - 1] );
                 }
-                /*
-                else if (i == 0 && count > 1)
-                {
-                    part0 = input.Substring(indexes[i], indexes[i]);
-                }
-                */
-                parts.Add(part);
+				
+				push @parts,$part;
+                #parts.Add(part);
             }
 
-            parts.Add(input);
-            return parts;
+			push @parts,$input;
+            #parts.Add(input);
+            return @parts;
         }
 
-        static List<String> split(String input, String separator)
+        #static List<String> split2(String input, String separator)
+		sub split2
         {
             //{123:5}
+			my $input = $_[0];
+			my $separator = $_[1];
+			
+            my @pair;
+            my $index = index($input,$separator);  #input.IndexOf(separator);  //4
 
-            var pair = new List<String>();
-            var index = input.IndexOf(separator);  //4
-
-            if (index >= 0)
+            if ($index >= 0)
             {
-                var key = input.Substring(1, index - 1);
-                var value = input.Substring(index + 1, input.Length - index - 2);
-                pair = new List<String>() { key, value };
+                my $key = substr $input,1,$index;      #input.Substring(1, index - 1);
+                my $value = substr $input,$index+1,length $input-$index-2;       #input.Substring(index + 1, input.Length - index - 2);
+                my @pair;
+				push @pair,$key;
+				push @pair,$value;
+								#pair = new List<String>() { key, value };
             }
-            return pair;
+            return @pair;
         }
 
-        static List<String> split(String input,char separator)
+        #static List<String> split3(String input,char separator)
+		sub split3
         {
+			my $input = $_[0];
+			my $separator = $_[1];
             //{123:5}
-            var index = input.IndexOf(separator);  //4
-            var key = input.Substring(1, index - 1);
-            var value = input.Substring(index + 1, input.Length - index - 2);
-            var pair = new List<String>() { key, value };
-            return pair;
+            my $index = index($input,$separator,0);   # input.IndexOf(separator);  //4
+            my $key = substr $input,1,$index -1  #input.Substring(1, index - 1);
+            my $value = substr $input,$index+1,length $input-$index-2;     # input.Substring(index + 1, input.Length - index - 2);
+            my @pair;
+			push @pair,$key;
+			push @pair,$value;
+										#my $pair = new List<String>() { key, value };
+            return @pair;
         }
 
         
-
-        static Boolean isNull(String input)
+        #static Boolean isNull(String input)
+		sub isNull
         {
-            return input == "" || input == "null";
+			my $input = $_[0];
+            return $input == "" || $input == "null";
         }
 
-        static Boolean isString(String input)
+        #static Boolean isString(String input)
+		sub isString
         {
-            return input[0] == '"' && input[input.Length - 1] == '"';
+			my $input = $_[0];
+			@array = split // , $input;
+            return $array[0] == '"' && $array[length $array - 1] == '"';
         }
 
-        static Boolean isNumber(String input)
-        {
-            int x;
-            return int.TryParse(input, out x);
+        #static Boolean isNumber(String input)
+        #{
+        #    int x;
+        #    return int.TryParse(input, out x);
+        #}
+
+        #$static Boolean isBoolean(String input)
+		sub isBoolean
+        {	
+			my $input = $_[0];
+            return $input == "true" || $input == "false";
         }
 
-        static Boolean isBoolean(String input)
+        #static Boolean isObject(String input)
+		sub isObject
         {
-            return input == "true" || input == "false";
+			my $input = $_[0];
+			@array = split // , $input;
+            return $array[0] == '{' && $array[length $array - 1] == '}';
         }
 
-        static Boolean isObject(String input)
-        {
-            return input[0] == '{' && input[input.Length - 1] == '}';
+        #static Boolean isArray(String input)
+        sub isArray
+		{
+			my $input = $_[0];
+			@array = split // , $input;
+            return $array[0] == '[' && $array[length $array - 1] == ']';
         }
 
-        static Boolean isArray(String input)
+        #static List<String> getPairOfObject(String input)
+		sub getPairOfObject
         {
-            return input[0] == '[' && input[input.Length - 1] == ']';
-        }
-
-        static List<String> getPairOfObject(String input)
-        {
+			my $input = $_[0];
             //{123:5}
-            var index = input.IndexOf(':');  //4
-            var key = input.Substring(1, index - 2);
-            var value = input.Substring(index + 1, input.Length - index - 1);
-            var pair = new List<String>() { key, value };
-            return pair;
+            my $index = index($input,':',0);
+            my $key = substr $input,1,$index - 3;
+            my $value = substr $input,,index + 1, length $input - $index - 2);
+			my @pair;
+			push @pair,$key;
+			push @pair,$value;
+            return @pair;
         }
 
-        static List<String> getElementsOfArray(String input)
+        #static List<String> getElementsOfArray(String input)
+		sub getElementsOfArray
         {
+			$input = $_[0];
             //[123,5]
-            var elements = input.Split(new char[] { ',', '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
-            return elements.ToList();
+            my @elements = split /[,\[\]]/ , $input;
+            return @elements;
         }
     }
 }
