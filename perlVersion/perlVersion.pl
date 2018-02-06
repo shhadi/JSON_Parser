@@ -23,8 +23,8 @@ sub Parse
 	my %dictionary;
     my @parts = getObjectParts($input);
 	
-	
 	#print Dumper(\@parts);
+	
 
 	foreach $part (@parts)
     {
@@ -32,58 +32,82 @@ sub Parse
         my $key = $pair[0];
         my $value = $pair[1];
 
-        if (!isNull($key))
+		#print "key=$key\nval=$value\n\n";		
+		#print Dumper(\@pair);
+
+		my $ss=isString($value);
+		my $bb=isBoolean($value);
+				
+		print "ss=$ss  ,  bb=$bb\n\n";
+		#my $res=isNull($key);
+		#print "is:$res";
+
+        if (isNull($key)!=0)
         {
-            if (isNull($value))
+			
+
+            if (isNull($value)==0)
             {
-				dictionary{$key} = "";
+				$dictionary{$key} = "";
             }
-            elsif (isString($value) || isNumber($value) || isBoolean($value))
+            elsif (isString($value)!=0 || isBoolean($value)!=0)
             {
-				dictionary{$key} = $value;
+				
+				
+				print "string/bool expected:$value\n";
+				$dictionary{$key} = $value;
             }
-            elsif (isArray($value))
-            {
+            elsif (isArray($value)!=0)
+            {  
+				print "Array expected:$value";
                 my @elements = getElementsOfArray($value);
                 my @parsedElements;
 
                 foreach $element (@elements)
                 {
-                    if (isNull($element) || isString($element) || isNumber($element) || isBoolean($element))
+                    if (isNull($element)!=0 || isString($element)!=0 || isBoolean($element)!=0)
                     {	
                         push(@parsedElements,$element);
                     }
-                    elsif (isArray($element))
+                    elsif (isArray($element)!=0)
                     {
                         push(@parsedElements,getElementsOfArray($element));
                     }
-                    elsif (isObject($element))
+                    elsif (isObject($element)!=0)
                     {
                         push(@parsedElements,getPairOfObject($element));
                     }
+					else
+					{
+						print "maybe number:$element";
+						push(@parsedElements,$element);
+					}
                 }
 					
 				
-                dictionary{$key} = $parsedElements;
+                $dictionary{$key} = $parsedElements;
                 
             }
-
-            elsif (isObject($value))
+            elsif (isObject($value)!=0)
             {
-                dictionary{$key} = Parse($value);
+				print "object expected:$value";
+                $dictionary{$key} = Parse($value);
             }
             else
             {
-                @_pair = split($value, ",\"");
-                my $_value = $_pair[0];
-                my $_element = $_pair[1];
-                dictionary{key} = $_value;
-                Parse($_element);
+				print "number expected:$value";
+				#$dictionary{$key} = $value;
+                #@_pair = split($value, ",\"");
+                #my $_value = $_pair[0];
+                #my $_element = $_pair[1];
+                #dictionary{key} = $_value;
+                #Parse($_element);
             }
 
         }
     }
 
+	#print Dumper(\%dictionary);
     return %dictionary;
 }
 
@@ -163,8 +187,8 @@ sub split1
 {
 	($input,@indexes) = @_;
     my @parts;
-	
-    for (my $i = 0; $i < @indexes; $i++)
+
+    for (my $i = 0; $i < @indexes ; $i++)
     {
         #[3,8]
         my $part = "";
@@ -172,23 +196,26 @@ sub split1
 		if ($i == 0 )
         {
             $part = substr $input,0,$indexes[$i];       # input.Substring(0, indexes[i]);
-            $input = substr $input,$indexes[$i]+1,(length $input) -1;       # input.Substring(indexes[i] + 1);
+            #$input = substr $input,$indexes[$i]+1,(length $input) -1;       # input.Substring(indexes[i] + 1);
 			
         }
         else
         {   
-			#[15,85]
-            $part = substr $input,0,$indexes[$i] - $indexes[$i - 1] - 1;      #input.Substring(0, indexes[i] - indexes[i - 1] - 1);
+			#[5,10,15]  asdfghjkl
+            #$part = substr $input,0,$indexes[$i] - $indexes[$i - 1] - 1;      #input.Substring(0, indexes[i] - indexes[i - 1] - 1);
             #$input = substr $input,$indexes[$i] - $indexes[$i - 1],(length $input) -  $indexes[$i];    #input.Substring(indexes[i] - indexes[i - 1] );
-			$input = substr $input,$indexes[$i]+1,(length $input) -1; 
-			
+			#$input = substr $input,$indexes[$i]+1,(length $input) -1; 
+			$part = substr $input,$indexes[$i-1]+1,$indexes[$i] - $indexes[$i - 1] - 1;      #input.Substring(0, indexes[i] - indexes[i - 1] - 1);
         }
 		
-		print "$part\n-----\n$input\n================\n";
 		push @parts,$part;
     }
 
-	push @parts,$input;
+	my $a=length $input;
+	$part = substr $input,$indexes[$i -1]+1, $a - $indexes[$i -1]-1;
+		
+	push @parts,$part;
+	#print Dumper(\@parts);
     return @parts;
 }
 
@@ -235,15 +262,32 @@ sub split3
 sub isNull
 {
 	my $input = $_[0];
-    return $input == "" || $input == "null";
+
+	if($input eq "" || $input eq "null")
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
+    
 
 #static Boolean isString(String input)
 sub isString
 {
 	my $input = $_[0];
 	@array = split // , $input;
-    return $array[0] == '"' && $array[length $array - 1] == '"';
+	if(($array[0] eq '"') && ($array[@array - 1] eq '"'))
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}   
+	
 }
 
 #static Boolean isNumber(String input)
@@ -256,7 +300,15 @@ sub isString
 sub isBoolean
 {	
 	my $input = $_[0];
-    return $input == "true" || $input == "false";
+	if($input eq "true" || $input eq "false")
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+
 }
 
 #static Boolean isObject(String input)
@@ -264,7 +316,16 @@ sub isObject
 {
 	my $input = $_[0];
 	@array = split // , $input;
-    return $array[0] == '{' && $array[length $array - 1] == '}';
+	
+	if (($array[0] eq '{') && ($array[@array - 1] eq '}'))
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+	
 }
 
 #static Boolean isArray(String input)
@@ -272,20 +333,33 @@ sub isArray
 {
 	my $input = $_[0];
 	@array = split // , $input;
-    return $array[0] == '[' && $array[length $array - 1] == ']';
+    
+	if ($array[0] eq '[' && $array[@array - 1] eq ']')
+	{
+		return 1;
+	}
+	else	
+	{
+		return 0;
+	}
 }
 
 #static List<String> getPairOfObject(String input)
 sub getPairOfObject
 {
 	my $input = $_[0];
+	#print "$input";
     #{123:5}
     my $index = index($input,':',0);
-    my $key = substr $input,1,$index - 3;
-    my $value = substr $input,,index + 1, length $input - $index - 2;
+    my $key = substr $input,1,$index - 2;
+    my $value = substr $input,$index + 1, (length $input)-$index;
+
+	#print "key=$key\nval=$value\n\n";
 	my @pair;
 	push @pair,$key;
 	push @pair,$value;
+
+	#print Dumper(@pair);
     return @pair;
 }
 
