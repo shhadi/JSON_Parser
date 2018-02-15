@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-
 namespace JSON_PARSER
 {
     class Program
@@ -15,9 +14,7 @@ namespace JSON_PARSER
 
         static void Main(string[] args)
         {
-
             var result = Parse(json2);
-
         }
 
         static Dictionary<String, Object> Parse(String input)
@@ -79,13 +76,12 @@ namespace JSON_PARSER
                         dictionary.Add(key, _value);
                         Parse(_element);
                     }
-
                 }
             }
 
             return dictionary;
         }
-        
+
         static List<String> getObjectParts(String input)
         {
             var indexes = new List<int>();
@@ -95,7 +91,7 @@ namespace JSON_PARSER
 
             input = removeTags(input);
 
-            for (int i=0;i<input.Length;i++)
+            for (int i = 0; i < input.Length; i++)
             {
                 var ch = input[i];
 
@@ -126,9 +122,9 @@ namespace JSON_PARSER
                         }
                         break;
                     //case ':':
-                      //  continue;
+                    //  continue;
                     case ',':
-                        if (openedString == 0 && openedArray==0 && openedTag == 1)
+                        if (openedString == 0 && openedArray == 0 && openedTag == 1)
                         {
                             indexes.Add(i);
                         }
@@ -152,7 +148,7 @@ namespace JSON_PARSER
             return result;
         }
 
-        static List<String> split(String input,List<int> indexes)
+        static List<String> split(String input, List<int> indexes)
         {
             var parts = new List<String>();
             var count = indexes.Count;
@@ -162,7 +158,7 @@ namespace JSON_PARSER
                 //[3,8]
                 var part = "";
 
-                if (i == 0 )
+                if (i == 0)
                 {
                     part = input.Substring(0, indexes[i]);
                     input = input.Substring(indexes[i] + 1);
@@ -170,7 +166,7 @@ namespace JSON_PARSER
                 else
                 {
                     part = input.Substring(0, indexes[i] - indexes[i - 1] - 1);
-                    input = input.Substring(indexes[i] - indexes[i - 1] );
+                    input = input.Substring(indexes[i] - indexes[i - 1]);
                 }
                 /*
                 else if (i == 0 && count > 1)
@@ -201,7 +197,7 @@ namespace JSON_PARSER
             return pair;
         }
 
-        static List<String> split(String input,char separator)
+        static List<String> split(String input, char separator)
         {
             //{123:5}
             var index = input.IndexOf(separator);  //4
@@ -210,8 +206,6 @@ namespace JSON_PARSER
             var pair = new List<String>() { key, value };
             return pair;
         }
-
-        
 
         static Boolean isNull(String input)
         {
