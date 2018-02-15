@@ -37,8 +37,9 @@ sub Main
 	print "333:";
 	Parse($fake_json3);		
 	print Dumper(\%object);	
-	my %o3 = $object{name};		
-    print Dumper(\%o3);	
+	my $o3 = $object{name}{id1};	
+	print "val:$o3";	
+    print Dumper(\$o3);	
 	
     print "=========================";
     #foreach $nextItem (@{$result{fields}{issuelinks}}) 
@@ -117,8 +118,10 @@ sub Parse
             elsif (isObject($value)==1)
             {
 				#print "object expected:$value";
-				my %parsedObject = Parse($value);  
-                $dictionary{$key} = (%parsedObject);   #%object = (%dictionary); 
+				my %parsedObject = Parse($value); 
+				print Dumper(%parsedObject); 
+                $dictionary{$key} = { %parsedObject };   #$nodes{$id} = { %node_hash };
+ 
 
 				#my %retrievedObject = $parsedObject; #$dictionary{$key}; 
 
