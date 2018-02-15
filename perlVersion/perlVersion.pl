@@ -2,6 +2,7 @@ use Data::Dumper;
 
 Main();
 
+%object;
 
 #static void Main(string[] args)
 sub Main
@@ -13,25 +14,31 @@ sub Main
     $json_arr="{\"name\":\"shhadi\",\"languages\":[\"JAVA\",\"PERL\"],\"sex\":\"m,a,l,e\",\"job\":{\"name\":\"software,developer\",\"org\":\"check,point\"},\"age\":29}";
     my $fake_json="{\"name\":\"shhadi\",\"languages\":[{\"id1\":\"JAVA\"},{\"id2\":\"PERL\"}]}";
 
+
+
     my $fake_json1="{\"name\":\"shhadi\"}";
     my $fake_json2="{\"languages\":[\"id1\",\"id2\"]}";
     my $fake_json3="{\"name\":{\"id1\":\"JAVA\"}}";
 
 
-
-    %result = Parse($fake_json3);	
-
-
-	print "DDD";
-	
-	#print Dumper(%{$result});
+    print "111:";
+	Parse($fake_json1);		
+	print Dumper(\%object);	
+	my $o1 = $object{name};		
+	print "$o1";	
 
 
-    #my $n = $result{name};   -->json_fake1 works!
-	my $n = $result{name}{id1};  
-	
-    print "RRR:$n";			
-    #print Dumper(\$result);	
+	print "222:";
+	Parse($fake_json2);		
+	print Dumper(\%object);	
+	my @o2 = $object{languages};		
+    print Dumper(\@o2);	
+
+	print "333:";
+	Parse($fake_json3);		
+	print Dumper(\%object);	
+	my %o3 = $object{name};		
+    print Dumper(\%o3);	
 	
     print "=========================";
     #foreach $nextItem (@{$result{fields}{issuelinks}}) 
@@ -94,7 +101,8 @@ sub Parse
                     }
                     elsif (isObject($element)==1)
                     {
-                        push(@parsedElements,Parse($element));
+						my %parsedObj = Parse($element);
+                        push(@parsedElements,(%parsedObj) );
                     }
 					else
 					{
@@ -103,18 +111,14 @@ sub Parse
 					}
                 }
 					
-                $dictionary{$key} = $parsedElements;
+                $dictionary{$key} = [@parsedElements];
 				
             }
             elsif (isObject($value)==1)
             {
 				#print "object expected:$value";
-				my %parsedObject = Parse($value);
-				
-				print "Parsed Oject:";
-				print Dumper(%parsedObject);
-
-                $dictionary{$key} = %parsedObject
+				my %parsedObject = Parse($value);  
+                $dictionary{$key} = (%parsedObject);   #%object = (%dictionary); 
 
 				#my %retrievedObject = $parsedObject; #$dictionary{$key}; 
 
@@ -138,10 +142,8 @@ sub Parse
 
         }
     }
-	
-	print "III:";
-	print Dumper(%dictionary);
 
+	%object = (%dictionary); 
     return %dictionary;
 }
 
